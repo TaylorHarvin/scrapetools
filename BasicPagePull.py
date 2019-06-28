@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 import re
-import json
 import time
 import sys
 import os
@@ -9,6 +8,8 @@ import os
 
 
 BASE_SITE = "https://www.sec.gov/cgi-bin/browse-edgar?CIK=AAPL&owner=exclude&action=getcompany"
+
+STR_IGNORE_LIST = ["\\xc2\\xa","\\xc2\\xa0","\\xe2\\x98\\x92","\\xe2\\x98\\x90","\\xc2\\xa0","\\xe2\\x84\\xa2","\\xe2\\x80\\x94\\xe2\\x80\\x94"]
 
 REQ_HEADERS = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -32,12 +33,15 @@ def GetPageSoup(requestedUrl):
             print(exc_type, fname, exc_tb.tb_lineno)
             time.sleep(10)
 
-
+def cleanData(htmlPageStr):
+    for ignoreStr in STR_IGNORE_LIST:
+        htmlPageStr = htmlPageStr.replace(ignoreStr," ")
+    return htmlPageStr
 def main():
     htmlPageSoup = GetPageSoup("https://www.sec.gov/Archives/edgar/data/320193/000032019319000066/a10-qq220193302019.htm")
     #print(htmlPageSoup)
     with open("page.html", "w") as file:
-        file.write(str(htmlPageSoup.encode("utf-8")))
+        file.write(cleanData(str(htmlPageSoup.encode("utf-8"))))
 
 
 if __name__ == "__main__":
